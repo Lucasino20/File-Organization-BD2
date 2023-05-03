@@ -22,16 +22,16 @@ Extendible Hash     -->   Accidentes Database
 
 **Estructura**
 ```cpp
-    template <typename TRecord, typename TKey>
-    class Sequential
-      {
-      private:
+template <typename TRecord, typename TKey>
+class Sequential
+ {
+  private:
     string fileName;
     string auxName;
     long sizeData = 0;
     long sizeAux = 0;
     const long sizeRecord = sizeof(TRecord);
-      }
+  }
 ```        
 **Inserción**
 >Para la inserción hacemos empleo de la función  **`insideSearch()`** usando **`binarySearch()`** lo que hace que hagamos O (log(n)) accesos a memoria secundaria. Luego, localizamos la posición donde será insertado el nuevo registro, si es que el espacio está libre, entonces insertamos, si no insertamos el registro en el  **`aux.dat`** que es nuestro espacio auxiliar. Seguido de esto actualizamos los punteros.
