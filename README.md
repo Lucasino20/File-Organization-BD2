@@ -44,16 +44,17 @@ class Sequential
    TRecord *search(TKey key, int &accesos)
 ```
 **Búqueda por rangos**
->Para la búsqueda por rangos lo que hacemos es buscar ubicar donde está el begin y el end dentro de los archivos **`aux.dat`** y **`dat.dat`** y retornar los valores que están dentro del intervalo sugerido verificando donde se ubican los elementos de manera ordenada por los punteros, ya que podría haber data que no esté dentro del mismo **`dat.dat`** si no que haya sido movido al **`aux.dat`** con su respectiva referencia.
+>En la búsqueda por rangos, lo que hacemos es determinar la posición del inicio y el final dentro de los archivos  **`aux.dat`**  y **`dat.dat`** . A continuación, comprobamos la ubicación de los elementos ordenados por punteros para retornar los valores que se encuentran dentro del intervalo deseado. Es importante verificar esta ubicación debido a que algunos datos pueden haber sido movidos del archivo **`dat.dat`**  al **`aux.dat`**, pero aun así están referenciados correctamente.
  ```cpp
    vector<TRecord> search(TKey begin, TKey end)
 ```
 **Remover**
->Para remover usamos las función **`erase()`** que permite ubicar el registro por key dentro de los archivos **`aux.dat`** y **`dat.dat`** se remueve y para mantener ordenada la data se hace de manera física un **`refactor()`** para mantener ordenada la data y mantener la referencia de los punteros luego de la remoción del registro. Además, está función nos permite verificar si es posible remover o no en caso este vacío o de no existir el registro pedido por el usuario.
+>Para eliminar registros en los archivos **`aux.dat`** y **`dat.dat`** , se utiliza la función  **`erase()`** que busca el registro a eliminar por su clave. Para mantener la coherencia de los datos, se realiza un reordenamiento físico llamado **`refactor()`** para reorganizar la estructura y mantener la referencia de los punteros después de la eliminación. Además, esta función también nos ayuda a verificar si es posible eliminar el registro solicitado por el usuario, comprobando si el archivo está vacío o si el registro no existe.
 ```cpp
    bool erase(TKey key)
 ```
 ## Extendible hash
+>Un extendible hash es una estructura de datos utilizada en la organización y acceso eficiente a grandes conjuntos de datos. Consiste en una tabla hash que se puede expandir dinámicamente a medida que se agregan más elementos a la estructura. Esto permite que la estructura de datos se adapte automáticamente al tamaño del conjunto de datos, lo que resulta en un mejor rendimiento y uso eficiente de la memoria.
 **Estructura**
 ```cpp
 template <typename TKey>
@@ -87,14 +88,36 @@ private:
     void insert(RecordHash<TKey> record, int &accesos)
 ```
 **Búsqueda**
->Para realizar el search, se utiliza la función **`hash_function(key)`** sobre la llave, de esta forma se obtiene la posición del registro en el archivo Data.dat, accedemos a esa posición en el archivo de datos. Si no encontramos un bucket (pos = -1) entonces no existe el registro. Caso contrario, se carga el bucket a memoria principal y se recorre de forma sequencial junto con todos los buckets enlazados hasta encontrar el registro en cuestión o llegar al final de la lista de buckets enlazados.
+>Para llevar a cabo la búsqueda, se aplica la función  **`hash_function(key)`**  a la clave del registro. De este modo, se obtiene la ubicación del registro dentro del archivo Data.dat, y se accede a dicha ubicación en el archivo de datos. Si no se encuentra un "bucket" (pos = -1), entonces el registro no existe. Si, por otro lado, se encuentra un bucket, se carga en la memoria principal y se examina de forma secuencial junto con todos los buckets enlazados hasta dar con el registro deseado o llegar al final de la lista de buckets enlazados.
 ```cpp
     RecordHash<TKey> *search(TKey key, int &accesos)
 ```
 **Remover**
->Para realiza el erase, se realiza una búsqueda y se elimina el registro del bucket dejando un espacio vacío en el bucket, y se presentan los siguientes casos. Si es el último bucket (de la lista enlazada de buckets) no hay problema. Caso contrario, tenemos que mover el último registro del último bucket en la lista enlazada a la posición que hemos dejado vacía. De esta forma, solo quedaría revisar el último bucket de la lista, si está vacío se elimina, caso contrario se deja como esta. De esta forma, se cumple la naturaleza del Dynamic hashing, de crecer y reducir su tamaño conforme se inserten o eliminen registros.
+>Para llevar a cabo la eliminación de un registro, se procede a realizar una búsqueda y se elimina el registro del bucket correspondiente, dejando un espacio vacío. Si este es el último bucket en la lista enlazada, no hay ningún problema. En caso contrario, se debe mover el último registro del último bucket en la lista enlazada a la posición que se ha dejado vacía. De esta manera, solo es necesario revisar el último bucket de la lista, eliminándolo si está vacío o dejándolo en su estado actual si no lo está. De este modo, se respeta la naturaleza del hashing dinámico, que permite el crecimiento y reducción del tamaño de la tabla hash a medida que se agregan o eliminan registros.
 ```cpp
     bool erase(TKey key)
 ```
 **Gráficas**
 >Inserción
+
+| Cuadro comparativo | | | | | |
+|:-------------------:|---|---|---|---|---|
+| Registros| 500| 1000| 1500| 2000|2500|
+| Hash | 1605| 3510| 5801| 7854| 8048|
+| Sequential | 2501| 4990| 7500| 10010|12500|
+
+>Hemos notado que el método de hash tiene significativamente menos accesos en comparación con el método secuencial. La razón de esto es que el hashing dinámico es mucho más eficiente para agregar nuevos elementos, ya que no requiere una búsqueda secuencial como la que se necesita en el método secuencial.
+
+<img height="400" src= Insercion.png>
+
+>Búsqueda
+
+| Cuadro comparativo | | | | | |
+|:-------------------:|---|---|---|---|---|
+| Registros |500 | 1000| 1500| 2000| 2500|
+| Hash | 1| 1| 1| 1| 1|
+| Sequential |9 |9 |9 | 9| 9|
+
+>En términos de eficiencia, la técnica de hashing dinámica es superior gracias a sus búsquedas en O(1), lo que significa que solo es necesario aplicar la función de hashing y acceder a la posición deseada. Por otro lado, la técnica secuencial necesita realizar una búsqueda binaria en el archivo índice, lo que tiene una complejidad de O(lgn). Ambos métodos tienen sus ventajas, pero en general, la hashing dinámica resulta ser mejor.
+
+<img height="400" src= Busqueda.png>
