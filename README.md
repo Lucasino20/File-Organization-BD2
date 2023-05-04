@@ -18,7 +18,7 @@ Extendible Hash     -->   Accidentes Database
   
 
 ## Sequential File
-
+>Un Sequential File es una estructura de datos en la que los registros se almacenan uno detrás del otro en un archivo. Al usar binary search esto puede resultar en una búsqueda más rápida y eficiente en comparación con la búsqueda secuencial.
 
 **Estructura**
 ```cpp
