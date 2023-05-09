@@ -857,6 +857,7 @@ void parcer(Sequential<Record<char[40]>, string> &seq, ExtendibleHash<int> &eh) 
                   Record<char[40]> rec(Name, Mpg, Cylinders, Displacement, Horsepower, Weight, Acceleration, Model, toLower(Origin));
                 
                   seq.insert(rec, accesos);
+                  rec.showRecord(1);
                   
                   t = clock() - t;
                   double time_taken = ((double)t)/CLOCKS_PER_SEC; // calculate the elapsed time
@@ -914,6 +915,7 @@ void parcer(Sequential<Record<char[40]>, string> &seq, ExtendibleHash<int> &eh) 
                   eh.insert(rec, accesos);
                   t = clock() - t;
                   double time_taken = ((double)t)/CLOCKS_PER_SEC; // calculate the elapsed time
+                  rec.showRecord(0);
                   cout<<endl;
                   printf("El programa tomó %f segundos en insertar el registro", time_taken);
                   printf("\nEl programa tomó %d accesos a memoria secundaria", accesos);
