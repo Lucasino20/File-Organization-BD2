@@ -2,6 +2,10 @@
 #define SEQ_H
 
 #include "record.h"
+#include <C:\Users\soto_\OneDrive\Desktop\BD2-proyect\jsong\include\nlohmann\json.hpp>
+#include <vector>
+
+using json = nlohmann::json;
 
 template <typename TRecord, typename TKey>
 class Sequential
@@ -306,6 +310,8 @@ public:
         }
         else cout << "SequentialError al abrir data en showAll\n";
     }
+
+
 
     void insert(TRecord &record, int &accesos)
     {
@@ -677,8 +683,31 @@ public:
         return false;
     }
     
-    void showRecords(){
+
+void guardarRegistroEnJSON(std::vector<TRecord> &records, const std::string &filename) const {
+    json j;
+    for (auto &r : records) {
+        j.push_back({
+            {"key", r.getKey()},
+            {"mpg", r.getMpg()},
+            {"cylinders", r.getCylinders()},
+            {"displacement", r.getDisplacement()},
+            {"horsepower", r.getHorsepower()},
+            {"weight", r.getWeight()},
+            {"acceleration", r.getAcceleration()},
+            {"model", r.getModel()},
+            {"origin", r.getOrigin()}
+        });
+    }
+
+    std::ofstream o(filename);
+    o << j.dump(4) << std::endl; // indent JSON output with 4 spaces
+    o.close();
+}
+
+    void showRecords() const{
       int cont = 1;
+      std::vector<TRecord> records;
       fopen(fileName);
         isfopen
         {
@@ -712,10 +741,12 @@ public:
                         fa.close();
                         return;
                     }
+                    records.push_back(tmp);
                     tmp.showRecord(cont++);
                     next = tmp.getNext();
                     file = tmp.getFile();
                 }
+                guardarRegistroEnJSON(records, "registros.json");
                 fa.close();   
             }
             else cout << "SequentialError al abrir aux en showRecords\n";
