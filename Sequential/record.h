@@ -2,8 +2,10 @@
 #define RECORD_H
 
 #include "../lib.h"
+#include <C:\Users\soto_\OneDrive\Desktop\BD2-proyect\jsong\include\nlohmann\json.hpp>
 
 using namespace std;
+using json = nlohmann::json;
 
 template <typename TKey>
 class Record
@@ -37,6 +39,45 @@ public:
         strcpy(this->key, name.c_str());
         strcpy(this->origin, origin.c_str());
     }
+
+
+
+
+
+    float getMpg()  {
+        return mpg;
+    }
+
+    int getCylinders()  {
+        return cylinders;
+    }
+
+    float getDisplacement()  {
+        return displacement;
+    }
+
+    float getHorsepower()  {
+        return horsepower;
+    }
+
+    float getWeight()  {
+        return weight;
+    }
+
+    float getAcceleration()  {
+        return acceleration;
+    }
+
+    int getModel ()  {
+        return int(model);
+    }
+    
+    string getOrigin() 
+    {
+        return string(origin);
+    }
+
+
     Record(string name, float mpg, int cylinders, float displacement, float horsepower, float weight, float acceleration, int model, string origin)
     {
         strcpy(this->key, name.c_str());
@@ -81,6 +122,23 @@ public:
         cout << "Origin: " << origin << "\n";
         cout << "Next : " << next << "\n";
         cout << "NextFile : " << file << "\n\n";
+
+        nlohmann::json j;
+
+        j["Key"] = key;
+        j["MPG"] = mpg;
+        j["Cylinders"] = cylinders;
+        j["Displacement"] = displacement;
+        j["Horsepower"] = horsepower;
+        j["Weight"] = weight;
+        j["Acceleration"] = acceleration;
+        j["Model"] = model;
+        j["Origin"] = origin;
+
+     // guardar objeto json en archivo
+     std::ofstream o("showData.json");
+     o << std::setw(4) << j << std::endl;
+     o.close();
     }
     void setNext(long _next, char _file)
     {
@@ -123,11 +181,29 @@ public:
     bool operator==(const Record &a) { return string(this->key) == string(a.key); }
     bool operator!=(const Record &a) { return string(this->key) != string(a.key); }
 
-    void showRecord(int cont){
+    void showRecord(int cont) const{
       if(cont == 1){
         cout << setw(5) << "Nº" << setw(40) << "Key" << setw(8) << "MPG" << setw(9) << "Cylinders" << setw(12) << "Displacement" << setw(10) << "Horsepower" << setw(8) << "Weight" << setw(12) << "Acceleration" << setw(8) << "Model" << setw(10) << "Origin" << endl;
       }
         cout << setw(5) << cont << setw(40) << key << setw(8) << mpg << setw(9) << cylinders << setw(12) << displacement << setw(10) << horsepower << setw(8) << weight << setw(12) << acceleration << setw(8) << model << setw(10) << origin << endl;
+     nlohmann::json j;
+
+        j["N"] = cont;
+        j["Key"] = key;
+        j["MPG"] = mpg;
+        j["Cylinders"] = cylinders;
+        j["Displacement"] = displacement;
+        j["Horsepower"] = horsepower;
+        j["Weight"] = weight;
+        j["Acceleration"] = acceleration;
+        j["Model"] = model;
+        j["Origin"] = origin;
+
+     // guardar objeto json en archivo
+     std::ofstream o("output.json");
+     o << std::setw(4) << j << std::endl;
+     o.close();
+    
     }
 };
 
