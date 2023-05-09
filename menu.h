@@ -676,51 +676,347 @@ void accidentes(ExtendibleHash<int> &eh){
   }
 }
 
+void parcer(Sequential<Record<char[40]>, string> &seq, ExtendibleHash<int> &eh) {
+    std::string command;
+    std::getline(std::cin, command);
+
+    std::string table;
+
+    if (command.substr(0, 6) == "SELECT") {
+        if (command.find("FROM") != std::string::npos && command.find("WHERE") != std::string::npos) {
+            std::string from = command.substr(command.find("FROM") + 5, command.find("WHERE") - command.find("FROM") - 6);
+            table = from;
+            
+            std::string condition = command.substr(command.find("WHERE") + 6);
+            std::istringstream iss(condition);
+            std::string field, op, value;
+            iss >> field >> op;
+            
+            
+            //cout << value.size() << " ";
+            if (table == "cars") {
+                if (op == "==") {
+                    getline(iss >> ws ,value);
+                    string key = value;
+                    int accesos = 0;
+                    clock_t t;
+                    t = clock();
+                    auto result = seq.search(key, accesos);
+                    if(result){
+                        (*result).showRecord(1);
+                        t = clock() - t;
+                        double time_taken = ((double)t)/CLOCKS_PER_SEC; // calculate the  elapsed time
+                        cout<<endl;
+                        printf("El programa tomo %f segundos en buscar el registro", time_taken);
+                        printf("\nEl programa tomo %d accesos a memoria secundaria", accesos);
+                    }else{
+                        cout << "No se encontro " << key << "\n";
+                    }
+                    dump();
+                    return;
+                } else if (op == "BETWEEN") {
+                    string begin, end;
+                    getline(iss >> ws, value);
+                    size_t pos = value.find(" and ");
+                    if (pos != std::string::npos) {
+                      begin = value.substr(0, pos);
+                      end = value.substr(pos + 5, value.size()+1);
+                    }
+                   
+                    clock_t t;
+                    if(begin > end){
+                        auto t = begin;
+                        begin = end;
+                        end = t;
+                    }
+                    
+                    t = clock();
+                    auto result = seq.search(toLower(begin), toLower(end));
+                    cout << "Resultados: " << result.size() << "\n";
+                    int cont = 1;
+                    for(auto r : result){
+                        r.showRecord(cont++);
+                    }
+                    t = clock() - t;
+                    double time_taken = ((double)t)/CLOCKS_PER_SEC; // calculate the  elapsed time
+                    cout<<endl;
+                    printf("El programa tomó %f segundos en buscar el rango de registros", time_taken);
+                    dump();
+                    return;
+                } else {
+                    cout << "Operacion no soportada " << endl;
+                    dump();
+                    return;
+                }
+            } else if (table == "accidentes") {
+                getline(iss >> ws ,value);
+                if (op == "==" && esEntero(value)) {
+        
+                    int key = stoi(value);
+                    int accesos = 0;
+                    clock_t t;
+                    
+                    t = clock();
+                    auto result = eh.search(key, accesos);
+                    if(result){
+                        (*result).showRecord(1);
+                        t = clock() - t;
+                        double time_taken = ((double)t)/CLOCKS_PER_SEC; // calculate the elapsed time
+                        cout<<endl;
+                        printf("El programa tomó %f segundos en buscar el registro", time_taken);
+                        printf("\nEl programa tomó %d accesos a memoria secundaria", accesos);
+                    }else{
+                        cout << "No se encontro " << key << "\n";
+                    }
+                    dump();
+                    return;
+                } else if (op == "BETWEEN" ) {
+                    string begin_, end_;
+                    getline(iss >> ws, value);
+                    size_t pos = value.find(" and ");
+                    if (pos != std::string::npos) {
+                      begin_ = value.substr(0, pos);
+                      end_ = value.substr(pos + 5, value.size()+1);
+                    }
+                    
+                    int begin = stoi(begin_);
+                    int end = stoi(end_);
+                    clock_t t;
+                    if(begin > end){
+                        auto t = begin;
+                        begin = end;
+                        end = t;
+                    }
+                    t = clock();
+                    auto result = eh.searchRange(begin, end);
+                    cout << "Resultado: " << result.size() << "\n";
+                    int cont = 1;
+                    for(auto r : result){
+                      r.showRecord(cont++);
+                    }
+                      t = clock() - t;
+                      double time_taken = ((double)t)/CLOCKS_PER_SEC; // calculate the elapsed time
+                      cout<<endl;
+                      printf("El programa tomó %f segundos en buscar el rango de registros", time_taken);
+                    dump();
+                    return;
+                }
+            } else {
+              cout << "Tabla no encontrada "<< endl;
+              dump();
+              return;
+            }
+             
+        } else {
+          cout << "Sentencia invalida o no soportada "<< endl;
+          dump();
+          return;
+        } 
+    } else if (command.substr(0, 6) == "INSERT") {
+        if (command.find("INTO") != std::string::npos && command.find("VALUES") != std::string::npos) {
+            std::string into = command.substr(command.find("INTO") + 4, command.find("VALUES") - command.find("INTO") - 5);
+            istringstream iss(into);
+            string table;
+            getline(iss >> ws, table);
+            std::string values = command.substr(command.find("VALUES") + 6);
+            if (table == "cars") {
+              
+              string Name;
+              float Mpg;
+              int Cylinders;
+              float Displacement;
+              float Horsepower;
+              float Weight;
+              float Acceleration;
+              int Model;
+              string Origin;
+              clock_t t;
+              
+              std::istringstream iss(values);
+              std::string value;
+              std::vector<std::string> valueList;
+              iss.get();
+              while (std::getline(iss, value, ',')) {
+                  valueList.push_back(value);
+              }             
+              string & str = valueList[8];
+              str = str.substr(0,str.size()-1);
+              
+              if (valueList.size() == 9 ) {
+                  Name = valueList[0];
+                  Mpg = std::stof(valueList[1]);
+                  Cylinders = std::stoi(valueList[2]);
+                  Displacement = std::stof(valueList[3]);
+                  Horsepower = std::stof(valueList[4]);
+                  Weight = std::stof(valueList[5]);
+                  Acceleration = std::stof(valueList[6]);
+                  Model = std::stoi(valueList[7]);
+                  Origin = valueList[8];
+                                    
+                  int accesos = 0;
+                  Record<char[40]> rec(Name, Mpg, Cylinders, Displacement, Horsepower, Weight, Acceleration, Model, toLower(Origin));
+                
+                  seq.insert(rec, accesos);
+                  
+                  t = clock() - t;
+                  double time_taken = ((double)t)/CLOCKS_PER_SEC; // calculate the elapsed time
+                  cout<<endl;
+                  printf("El programa tomó %f segundos en insertar el registro", time_taken);
+                  printf("\nEl programa tomó %d accesos a memoria secundaria", accesos);
+
+                  dump();
+                  return;
+              } else {
+                cout << "Valores ingresados invalidos";
+                dump();
+                return;
+              }
+              
+            } else if (table == "accidentes") {
+                int id;
+                int corte;
+                int fecha;
+                string hora;
+                string departamento;
+                string codigo;
+                int kilometro;
+                string modalidad;
+                int fallecidos;
+                int heridos;
+                clock_t t;
+
+                std::istringstream iss(values);
+                std::string value;
+                std::vector<std::string> valueList;
+                iss.get();
+                while (std::getline(iss, value, ',')) {
+                    valueList.push_back(value);
+                }             
+                string & str = valueList[9];
+                str = str.substr(0,str.size()-1);
+
+                if (valueList.size() == 10) {
+                  
+                  id = stoi(valueList[0]);
+                  corte = stoi(valueList[1]);
+                  fecha = stoi(valueList[2]);
+                  hora = (valueList[3]);
+                  departamento = (valueList[4]);
+                  codigo = (valueList[5]);
+                  kilometro = stoi(valueList[6]);
+                  modalidad = (valueList[7]);
+                  fallecidos = stoi(valueList[8]);
+                  heridos = stoi(valueList[9]);
+
+                  RecordHash<int> rec(id, corte, fecha, hora, toUpper(departamento), codigo, kilometro, toUpper(modalidad), fallecidos, heridos);
+                  int accesos = 0;
+                  t = clock();
+                  eh.insert(rec, accesos);
+                  t = clock() - t;
+                  double time_taken = ((double)t)/CLOCKS_PER_SEC; // calculate the elapsed time
+                  cout<<endl;
+                  printf("El programa tomó %f segundos en insertar el registro", time_taken);
+                  printf("\nEl programa tomó %d accesos a memoria secundaria", accesos);
+                  dump();
+                  return;
+                } else {
+                    cout << "Valores ingresados invalidos";
+                    dump();
+                    return;
+                }
+            } else {
+              cout << "Tabla no encontrada "<< endl;
+              dump();
+              return;
+            }
+
+            
+        }
+    } else if (command.substr(0, 6) == "DELETE") {
+        if (command.find("FROM") != std::string::npos && command.find("WHERE") != std::string::npos) {
+            std::string from = command.substr(command.find("FROM") + 5, command.find("WHERE") - command.find("FROM") - 6);
+            table = from;
+
+            std::string condition = command.substr(command.find("WHERE") + 6);
+            std::istringstream iss(condition);
+            std::string field, op, value;
+            iss >> field >> op;
+            
+            if (table == "cars") {
+              if (op == "==") {
+                getline(iss >> ws ,value);
+                string key = value;
+                if(seq.erase(toLower(key))){
+                  cout << "Registro eliminado\n";
+                }else{
+                  cout << "No se elimino\n";
+                }
+                dump();
+                return;
+              } else {
+                cout << "Operacion invalida"<< endl;
+                dump();
+                return;
+              }
+            }else if (table == "accidentes") {
+              if (op == "==") {
+                getline(iss >> ws ,value);
+                int key = stoi(value);
+                
+                if(eh.erase(key)){
+                  cout << "Registro eliminado\n";
+                }else{
+                  cout << "No se elimino\n";
+                }
+
+                dump();
+                return;
+
+              } else {
+                cout << "Operacion invalida"<< endl;
+                dump();
+                return;
+              }
+            } else {
+              cout << "Tabla no encontrada "<< endl;
+              dump();
+              return;
+            }
+            
+        }
+    }
+
+    return;
+}
+
+
 void menu_principal(Sequential<Record<char[40]>, string> &seq, ExtendibleHash<int> &eh){
-  
+  insertar_secuencial(seq);
+  insertar_hash(eh);
   while(1){
     string input;
     int opcion;
     bool repite = true;
-    do{
+      
       cout<<"\e[1;1H\e[2J";
       cout<<"DATA BASE :D"<<endl;
       salto;
-      cout<<"¿Que deseas hacer?"<<endl;
-      cout<<"-> Elige un numero"<<endl;
+      cout<<"Ingresa la sentencia SQL"<<endl;
+      cout<<"-> Dadas las tablas:"<<endl;
       salto;
       salto;
-      cout<<"1. Secuencial File - Cars database"<<endl;
+      cout<<"Secuencial File - cars database"<<endl;
       salto;
-      cout<<"2. Extendible Hash, Dinamic Hashing - accidentes database"<<endl;
+      cout<<"Extendible Hash, Dinamic Hashing - accidentes database"<<endl;
       salto;
 
-      getline(cin, input);
-      if(esEntero(input)){
-        repite = false;
-      }
-    }
-    while(repite);
+      parcer(seq,eh);
 
-    opcion = atoi(input.c_str());
-
-    switch(opcion){
-      case 1:
-        cars(seq);
-        break;
-      case 2:
-        accidentes(eh);
-        break;
-      case 3:
-        exit(-1);
-        break;
-      default:
-        menu_principal(seq, eh);
-        break;
-    }
-
-  }
+  
   
 }
+
+}
+
 
 #endif
