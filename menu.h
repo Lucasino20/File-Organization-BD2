@@ -11,9 +11,14 @@
 #include <time.h>
 #include <cstdlib>
 #include "Sequential/sequential.h"
+#include "Sequential/record.h"
 #include "DynamicHash/extendibleHash.h"
 
 using namespace std;
+
+template <typename TRecord>
+void guardarRegistroEnJSON(std::vector<TRecord> &records, const std::string &filename);
+
 
 #define salto cout<<endl
 #define ARCHIVO_CARS "cars.csv"
@@ -416,7 +421,10 @@ void buscar_registro_hash(ExtendibleHash<int> &eh){
   dump();
 }
 
+
 void buscar_rango_registro_secuencial(Sequential<Record<char[40]>, string> &seq){
+  std::vector<Record<char[40]>> records;
+
   cout << "\n\n----------Busqueda por rango----------\n\n";
   string key1, key2;
   clock_t t;
@@ -435,10 +443,12 @@ void buscar_rango_registro_secuencial(Sequential<Record<char[40]>, string> &seq)
   cout << "Resultados: " << result.size() << "\n";
   int cont = 1;
   for(auto r : result){
+    records.push_back(r);
     r.showRecord(cont++);
   }
   t = clock() - t;
   double time_taken = ((double)t)/CLOCKS_PER_SEC; // calculate the  elapsed time
+  seq.guardarRegistroEnJSON(records, "reg_rango.json");
   cout<<endl;
   printf("El programa tomó %f segundos en buscar el rango de registros", time_taken);
   dump();
