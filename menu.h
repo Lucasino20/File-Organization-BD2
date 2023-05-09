@@ -681,8 +681,18 @@ void parcer(Sequential<Record<char[40]>, string> &seq, ExtendibleHash<int> &eh) 
     std::getline(std::cin, command);
 
     std::string table;
-
+    
     if (command.substr(0, 6) == "SELECT") {
+        if (command == "SELECT * FROM cars") {
+          seq.showRecords();
+          dump();
+          return;
+        }
+        else if (command == "SELECT * FROM accidentes") {
+          eh.showRecords();
+          dump();
+          return;
+        }
         if (command.find("FROM") != std::string::npos && command.find("WHERE") != std::string::npos) {
             std::string from = command.substr(command.find("FROM") + 5, command.find("WHERE") - command.find("FROM") - 6);
             table = from;
@@ -921,7 +931,7 @@ void parcer(Sequential<Record<char[40]>, string> &seq, ExtendibleHash<int> &eh) 
                   t = clock();
                   eh.insert(rec, accesos);
                   string op_;
-                  cout << "Desea visualizar los registros de la tabla cars Si(S), No(*)?" << endl;
+                  cout << "Desea visualizar los registros de la tabla accidentes Si(S), No(*)?" << endl;
                   cin >> op_;
                   if (op_ == "S") {
                     eh.showRecords();
@@ -964,9 +974,16 @@ void parcer(Sequential<Record<char[40]>, string> &seq, ExtendibleHash<int> &eh) 
                 string key = value;
                 if(seq.erase(toLower(key))){
                   cout << "Registro eliminado\n";
+                  string op_;
+                  cout << "Desea visualizar los registros de la tabla cars Si(S), No(*)?" << endl;
+                  cin >> op_;
+                  if (op_ == "S") {
+                    seq.showRecords();
+                  }
                 }else{
                   cout << "No se elimino\n";
                 }
+                
                 dump();
                 return;
               } else {
@@ -981,10 +998,16 @@ void parcer(Sequential<Record<char[40]>, string> &seq, ExtendibleHash<int> &eh) 
                 
                 if(eh.erase(key)){
                   cout << "Registro eliminado\n";
+                  string op_;
+                  cout << "Desea visualizar los registros de la tabla accidentes Si(S), No(*)?" << endl;
+                  cin >> op_;
+                  if (op_ == "S") {
+                    eh.showRecords();
+                  }
                 }else{
                   cout << "No se elimino\n";
                 }
-
+                
                 dump();
                 return;
 
