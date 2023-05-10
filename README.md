@@ -121,3 +121,5 @@ private:
 >En términos de eficiencia, la técnica de hashing dinámica es superior gracias a sus búsquedas en O(1), lo que significa que solo es necesario aplicar la función de hashing y acceder a la posición deseada. Por otro lado, la técnica secuencial necesita realizar una búsqueda binaria en el archivo índice, lo que tiene una complejidad de O(lgn). Ambos métodos tienen sus ventajas, pero en general, la hashing dinámica resulta ser mejor.
 
 <img height="400" src= Busqueda.png>
+
+ENLACE DEL VIDEO :https://drive.google.com/file/d/1wv5Uj5qXZTPHEeBjxjxwmZX0JvowPNUd/view?usp=share_link
