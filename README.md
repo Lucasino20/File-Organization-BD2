@@ -34,12 +34,23 @@ class Sequential
   }
 ```        
 **Inserción**
->Para la inserción hacemos empleo de la función  **`insideSearch()`** usando **`binarySearch()`** lo que hace que hagamos O (log(n)) accesos a memoria secundaria. Luego, localizamos la posición donde será insertado el nuevo registro, si es que el espacio está libre, entonces insertamos, si no insertamos el registro en el  **`aux.dat`** que es nuestro espacio auxiliar. Seguido de esto actualizamos los punteros.
+>La función **insert** recibe un registro record y un contador accesos, que se utiliza para realizar un seguimiento del número de accesos al archivo.
+Primero, la función verifica si el archivo está vacío. Si es así, abre el archivo, escribe el registro en la posición 0 y cierra el archivo.
+Si el archivo no está vacío, utiliza la función insideSearch para buscar la posición donde el registro debe ser insertado en el archivo.
+Luego, la función abre el archivo y lee el registro en la posición encontrada. Si la posición es 0 y el registro es menor que el registro en la posición 0, la función verifica si el registro es el único registro en el archivo. Si es así, escribe el registro en la posición 0 y actualiza el índice. De lo contrario, escribe el registro en un archivo auxiliar y actualiza el índice.
+Si la posición no es 0, la función verifica si el registro es el último registro en el archivo. Si es así, escribe el registro al final del archivo y actualiza el registro anterior para apuntar al nuevo registro. Si no es el último registro, la función verifica si hay un registro eliminado antes y utiliza ese espacio para insertar el registro. Si no hay espacio disponible, escribe el registro en un archivo auxiliar y actualiza el índice.
+Finalmente, la función cierra el archivo y devuelve el contador accesos.
  ```cpp
     void insert(TRecord &record, int &accesos)
 ```
 **Búsqueda**
->El algoritmo **`binarySearch()`**se usa para ubicar un registro en el archivo dado un valor búsqueda, esto los hacemos en O(log(n))accesos a memoria secundaria. Además, durante la búsqueda si es que un archivo fue marcado como eliminado antes se descarta en la búsqueda.
+>La función **search** que busca un registro con una clave dada en un archivo secuencial. El archivo se compone de registros TRecord que tienen una clave y un puntero al siguiente registro en el archivo (si es -1, indica que es el último registro del archivo; si es -2, indica que el registro ha sido eliminado.
+La función recibe como parámetros la clave que se desea buscar y una variable de referencia accesos que se utiliza para contar la cantidad de accesos a disco que se realizan durante la búsqueda.
+La búsqueda se realiza llamando a la función insideSearch, que determina la posición del registro con la clave buscada. Luego, se abre el archivo y se lee el registro correspondiente a la posición encontrada.
+Si la clave del registro leído coincide con la clave buscada, se devuelve un puntero al registro. Si el puntero al siguiente registro es -2, se indica que el registro ha sido eliminado lógicamente y se devuelve un puntero nulo.
+Si el puntero al siguiente registro es -1, se indica que no hay más registros en el archivo y se devuelve un puntero nulo.
+Si el puntero al siguiente registro es distinto de -1 y -2, se indica que el siguiente registro está en el archivo auxiliar y se busca en él. El archivo auxiliar se abre y se lee el registro correspondiente a la posición indicada por el puntero al siguiente registro. Si la clave coincide con la buscada, se devuelve un puntero al registro. Si el puntero al siguiente registro es -2, se indica que el registro ha sido eliminado lógicamente y se devuelve un puntero nulo. Si no se encuentra el registro, se devuelve un puntero nulo.
+En caso de que ocurra algún error al abrir los archivos, se muestra un mensaje de error y se devuelve un puntero nulo.
  ```cpp
    TRecord *search(TKey key, int &accesos)
 ```
@@ -83,14 +94,20 @@ private:
  }
 ```
 **Inserción**
->Para la inserción aplicamos la función **`hash_function(key)`** sobre el key, que nos retorna una posición en el archivo Index.dat, Index.dat retorna la posición física donde insertaremos el registro en el archivo Data.dat. Luego se accede a esa posición y existen 2 posibilidades, la primera es que no exista un Bucket (conjunto de registros), en ese caso creamos uno e insertamos el registro en el nuevo bucket (tomando 2 accesos extra), el segundo caso es que ya exista un bucket, entonces revisamos si hay espacio en el bucket para insertar, caso contrario creamos un nuevo bucket, lo enlazamos e insertamos el registro en el nuevo bucket. (De esta forma la estructura crece dinámicamente, porque creamos nuevos buckets según sea necesario.
+>La función **insert()** recibe un registro y lo inserta en la tabla de hash. Si el registro ya existe en la tabla, se muestra un mensaje y no se realiza la inserción. Si no existe, se calcula la posición de inserción en la tabla de hash utilizando una función de hash. Se lee el bucket correspondiente a esa posición y si está lleno, se realiza una división del bucket y se redistribuyen los registros. Si después de la división el bucket sigue lleno y tiene la altura máxima permitida, se crea un bucket adicional y se agrega a la lista enlazada de buckets. Si el bucket no está lleno, se inserta el registro en ese bucket. Al finalizar, se incrementa el tamaño del índice para esa posición en la tabla de hash y se cierra el archivo de datos. La variable "accesos" es utilizada para llevar un conteo de las operaciones de lectura y escritura realizadas en el archivo de datos.
 ```cpp
     void insert(RecordHash<TKey> record, int &accesos)
 ```
 **Búsqueda**
->Para llevar a cabo la búsqueda, se aplica la función  **`hash_function(key)`**  a la clave del registro. De este modo, se obtiene la ubicación del registro dentro del archivo Data.dat, y se accede a dicha ubicación en el archivo de datos. Si no se encuentra un "bucket" (pos = -1), entonces el registro no existe. Si, por otro lado, se encuentra un bucket, se carga en la memoria principal y se examina de forma secuencial junto con todos los buckets enlazados hasta dar con el registro deseado o llegar al final de la lista de buckets enlazados.
+>La función **search()** toma una clave "key" como entrada y utiliza una función hash para determinar la ubicación en la tabla hash donde se deben buscar registros con esa clave. Si la tabla hash tiene registros en esa ubicación, se busca en cada "bucket" o contenedor asociado hasta encontrar el registro con la clave deseada. Si se encuentra el registro, se devuelve un puntero a ese registro. Si no se encuentra, se devuelve un puntero nulo. Además, la función mantiene un contador de "accesos" para registrar el número de operaciones de lectura realizadas en la búsqueda.
 ```cpp
     RecordHash<TKey> *search(TKey key, int &accesos)
+```
+
+**Busqueda por rango**
+>La función **search_range()** implementa una función para buscar y retornar un vector de registros (clase RecordHash) que se encuentran en el rango definido por dos claves (parámetros key1 y key2). La búsqueda se realiza recorriendo todos los buckets (contenedores de registros) que existen en la tabla hash, utilizando una función de hash para determinar la posición inicial de búsqueda. Cada bucket se lee desde el archivo de almacenamiento y se busca en él los registros que caen dentro del rango de búsqueda. Los registros que cumplen con este criterio se agregan al vector result, que se retorna al final de la función. Además, se utiliza un conjunto visited para evitar leer dos veces el mismo bucket. Si no se puede abrir el archivo, se imprime un mensaje de error y se retorna un vector vacío
+```cpp
+    vector<RecordHash<TKey>> searchRange(TKey key1, TKey key2)
 ```
 **Remover**
 >Para llevar a cabo la eliminación de un registro, se procede a realizar una búsqueda y se elimina el registro del bucket correspondiente, dejando un espacio vacío. Si este es el último bucket en la lista enlazada, no hay ningún problema. En caso contrario, se debe mover el último registro del último bucket en la lista enlazada a la posición que se ha dejado vacía. De esta manera, solo es necesario revisar el último bucket de la lista, eliminándolo si está vacío o dejándolo en su estado actual si no lo está. De este modo, se respeta la naturaleza del hashing dinámico, que permite el crecimiento y reducción del tamaño de la tabla hash a medida que se agregan o eliminan registros.
